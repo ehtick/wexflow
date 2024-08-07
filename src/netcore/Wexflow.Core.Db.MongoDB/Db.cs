@@ -205,16 +205,16 @@ namespace Wexflow.Core.Db.MongoDB
                 return uo switch
                 {
                     UserOrderBy.UsernameAscending => col
-                        .Find(u => u.Username.ToLower().Contains(keywordToLower) &&
+                        .Find(u => u.Username.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) &&
                                    u.UserProfile == UserProfile.Administrator)
                         .Sort(Builders<User>.Sort.Ascending(u => u.Username))
                         .ToEnumerable(),
                     UserOrderBy.UsernameDescending => col
-                        .Find(u => u.Username.ToLower().Contains(keywordToLower) &&
+                        .Find(u => u.Username.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) &&
                                    u.UserProfile == UserProfile.Administrator)
                         .Sort(Builders<User>.Sort.Descending(u => u.Username))
                         .ToEnumerable(),
-                    _ => Array.Empty<User>()
+                    _ => []
                 };
             }
         }
@@ -319,12 +319,12 @@ namespace Wexflow.Core.Db.MongoDB
             }
         }
 
-        public override Core.Db.User GetUserById(string userId)
+        public override Core.Db.User GetUserById(string id)
         {
             lock (Padlock)
             {
                 var col = _db.GetCollection<User>(Core.Db.User.DOCUMENT_NAME);
-                var user = col.Find(u => u.Id == userId).FirstOrDefault();
+                var user = col.Find(u => u.Id == id).FirstOrDefault();
                 return user;
             }
         }
@@ -375,13 +375,13 @@ namespace Wexflow.Core.Db.MongoDB
 
                 return uo switch
                 {
-                    UserOrderBy.UsernameAscending => col.Find(u => u.Username.ToLower().Contains(keywordToLower))
+                    UserOrderBy.UsernameAscending => col.Find(u => u.Username.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase))
                         .Sort(Builders<User>.Sort.Ascending(u => u.Username))
                         .ToEnumerable(),
-                    UserOrderBy.UsernameDescending => col.Find(u => u.Username.ToLower().Contains(keywordToLower))
+                    UserOrderBy.UsernameDescending => col.Find(u => u.Username.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase))
                         .Sort(Builders<User>.Sort.Descending(u => u.Username))
                         .ToEnumerable(),
-                    _ => Array.Empty<User>()
+                    _ => []
                 };
             }
         }
@@ -416,7 +416,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var keywordToUpper = keyword.ToUpper();
                 var col = _db.GetCollection<HistoryEntry>(Core.Db.HistoryEntry.DOCUMENT_NAME);
-                return col.Find(e => e.Name.ToUpper().Contains(keywordToUpper) || e.Description.ToUpper().Contains(keywordToUpper)).ToEnumerable();
+                return col.Find(e => e.Name.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase) || e.Description.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase)).ToEnumerable();
             }
         }
 
@@ -426,7 +426,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var keywordToUpper = keyword.ToUpper();
                 var col = _db.GetCollection<HistoryEntry>(Core.Db.HistoryEntry.DOCUMENT_NAME);
-                return col.Find(e => e.Name.ToUpper().Contains(keywordToUpper) || e.Description.ToUpper().Contains(keywordToUpper)).ToEnumerable().Skip((page - 1) * entriesCount).Take(entriesCount);
+                return col.Find(e => e.Name.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase) || e.Description.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase)).ToEnumerable().Skip((page - 1) * entriesCount).Take(entriesCount);
             }
         }
 
@@ -441,102 +441,114 @@ namespace Wexflow.Core.Db.MongoDB
                 return heo switch
                 {
                     EntryOrderBy.StatusDateAscending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Ascending(he => he.StatusDate))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.StatusDateDescending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Descending(he => he.StatusDate))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.WorkflowIdAscending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Ascending(he => he.WorkflowId))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.WorkflowIdDescending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Descending(he => he.WorkflowId))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.NameAscending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Ascending(he => he.Name))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.NameDescending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Descending(he => he.Name))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.LaunchTypeAscending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Ascending(he => he.LaunchType))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.LaunchTypeDescending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Descending(he => he.LaunchType))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.DescriptionAscending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Ascending(he => he.Description))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.DescriptionDescending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Descending(he => he.Description))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.StatusAscending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Ascending(he => he.Status))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.StatusDescending => col
-                        .Find(he => (he.Name.ToLower().Contains(keywordToLower) ||
-                                     he.Description.ToLower().Contains(keywordToLower)) && he.StatusDate > from &&
-                                    he.StatusDate < to)
+                        .Find(he => (he.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                     he.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) &&
+                                     he.StatusDate > from &&
+                                     he.StatusDate < to)
                         .Sort(Builders<HistoryEntry>.Sort.Descending(he => he.Status))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
-                    _ => Array.Empty<HistoryEntry>()
+                    _ => []
                 };
             }
         }
@@ -552,102 +564,102 @@ namespace Wexflow.Core.Db.MongoDB
                 return eo switch
                 {
                     EntryOrderBy.StatusDateAscending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Ascending(e => e.StatusDate))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.StatusDateDescending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Descending(e => e.StatusDate))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.WorkflowIdAscending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Ascending(e => e.WorkflowId))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.WorkflowIdDescending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Descending(e => e.WorkflowId))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.NameAscending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Ascending(e => e.Name))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.NameDescending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Descending(e => e.Name))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.LaunchTypeAscending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Ascending(e => e.LaunchType))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.LaunchTypeDescending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Descending(e => e.LaunchType))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.DescriptionAscending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Ascending(e => e.Description))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.DescriptionDescending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Descending(e => e.Description))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.StatusAscending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Ascending(e => e.Status))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
                     EntryOrderBy.StatusDescending => col
-                        .Find(e => (e.Name.ToLower().Contains(keywordToLower) ||
-                                    e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from &&
+                        .Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) ||
+                                    e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from &&
                                    e.StatusDate < to)
                         .Sort(Builders<Entry>.Sort.Descending(e => e.Status))
                         .ToEnumerable()
                         .Skip(skip)
                         .Take(entriesCount),
-                    _ => Array.Empty<Entry>()
+                    _ => []
                 };
             }
         }
@@ -658,7 +670,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var keywordToUpper = keyword.ToUpper();
                 var col = _db.GetCollection<HistoryEntry>(Core.Db.HistoryEntry.DOCUMENT_NAME);
-                return col.Find(e => e.Name.ToUpper().Contains(keywordToUpper) || e.Description.ToUpper().Contains(keywordToUpper)).CountDocuments();
+                return col.Find(e => e.Name.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase) || e.Description.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase)).CountDocuments();
             }
         }
 
@@ -669,7 +681,7 @@ namespace Wexflow.Core.Db.MongoDB
                 var keywordToLower = keyword.ToLower();
                 var col = _db.GetCollection<HistoryEntry>(Core.Db.HistoryEntry.DOCUMENT_NAME);
 
-                return col.Find(e => (e.Name.ToLower().Contains(keywordToLower) || e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from && e.StatusDate < to).CountDocuments();
+                return col.Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) || e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from && e.StatusDate < to).CountDocuments();
             }
         }
 
@@ -680,7 +692,7 @@ namespace Wexflow.Core.Db.MongoDB
                 var keywordToLower = keyword.ToLower();
                 var col = _db.GetCollection<Entry>(Core.Db.Entry.DOCUMENT_NAME);
 
-                return col.Find(e => (e.Name.ToLower().Contains(keywordToLower) || e.Description.ToLower().Contains(keywordToLower)) && e.StatusDate > from && e.StatusDate < to).CountDocuments();
+                return col.Find(e => (e.Name.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase) || e.Description.Contains(keywordToLower, StringComparison.CurrentCultureIgnoreCase)) && e.StatusDate > from && e.StatusDate < to).CountDocuments();
             }
         }
 
@@ -690,7 +702,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var col = _db.GetCollection<HistoryEntry>(Core.Db.HistoryEntry.DOCUMENT_NAME);
                 var q = col.Find(FilterDefinition<HistoryEntry>.Empty).Sort(Builders<HistoryEntry>.Sort.Ascending(e => e.StatusDate)).ToEnumerable().ToArray();
-                return q.Any() ? q.Select(e => e.StatusDate).First() : DateTime.Now;
+                return q.Length > 0 ? q.Select(e => e.StatusDate).First() : DateTime.Now;
             }
         }
 
@@ -700,7 +712,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var col = _db.GetCollection<HistoryEntry>(Core.Db.HistoryEntry.DOCUMENT_NAME);
                 var q = col.Find(FilterDefinition<HistoryEntry>.Empty).Sort(Builders<HistoryEntry>.Sort.Descending(e => e.StatusDate)).ToEnumerable().ToArray();
-                return q.Any() ? q.Select(e => e.StatusDate).First() : DateTime.Now;
+                return q.Length > 0 ? q.Select(e => e.StatusDate).First() : DateTime.Now;
             }
         }
 
@@ -710,7 +722,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var col = _db.GetCollection<Entry>(Core.Db.Entry.DOCUMENT_NAME);
                 var q = col.Find(FilterDefinition<Entry>.Empty).Sort(Builders<Entry>.Sort.Ascending(e => e.StatusDate)).ToEnumerable().ToArray();
-                return q.Any() ? q.Select(e => e.StatusDate).First() : DateTime.Now;
+                return q.Length > 0 ? q.Select(e => e.StatusDate).First() : DateTime.Now;
             }
         }
 
@@ -720,7 +732,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var col = _db.GetCollection<Entry>(Core.Db.Entry.DOCUMENT_NAME);
                 var q = col.Find(FilterDefinition<Entry>.Empty).Sort(Builders<Entry>.Sort.Descending(e => e.StatusDate)).ToEnumerable().ToArray();
-                return q.Any() ? q.Select(e => e.StatusDate).First() : DateTime.Now;
+                return q.Length > 0 ? q.Select(e => e.StatusDate).First() : DateTime.Now;
             }
         }
 
@@ -1097,7 +1109,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var col = _db.GetCollection<Record>(Core.Db.Record.DOCUMENT_NAME);
                 var keywordToUpper = keyword.ToUpper();
-                var records = col.Find(r => r.Name.ToUpper().Contains(keywordToUpper) || (!string.IsNullOrEmpty(r.Description) && r.Description.ToUpper().Contains(keywordToUpper))).Sort(Builders<Record>.Sort.Descending(r => r.CreatedOn)).ToList();
+                var records = col.Find(r => r.Name.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase) || (!string.IsNullOrEmpty(r.Description) && r.Description.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase))).Sort(Builders<Record>.Sort.Descending(r => r.CreatedOn)).ToList();
                 return records;
             }
         }
@@ -1118,7 +1130,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var col = _db.GetCollection<Record>(Core.Db.Record.DOCUMENT_NAME);
                 var keywordToUpper = keyword.ToUpper();
-                var records = col.Find(r => (r.CreatedBy == createdBy || r.AssignedTo == assingedTo) && (r.Name.ToUpper().Contains(keywordToUpper) || (!string.IsNullOrEmpty(r.Description) && r.Description.ToUpper().Contains(keywordToUpper)))).Sort(Builders<Record>.Sort.Descending(r => r.CreatedOn)).ToList();
+                var records = col.Find(r => (r.CreatedBy == createdBy || r.AssignedTo == assingedTo) && (r.Name.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase) || (!string.IsNullOrEmpty(r.Description) && r.Description.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase)))).Sort(Builders<Record>.Sort.Descending(r => r.CreatedOn)).ToList();
                 return records;
             }
         }
@@ -1247,7 +1259,7 @@ namespace Wexflow.Core.Db.MongoDB
             {
                 var col = _db.GetCollection<Notification>(Core.Db.Notification.DOCUMENT_NAME);
                 var keywordToUpper = keyword.ToUpper();
-                var notifications = col.Find(n => n.AssignedTo == assignedTo && n.Message.ToUpper().Contains(keywordToUpper)).Sort(Builders<Notification>.Sort.Descending(n => n.AssignedOn)).ToList();
+                var notifications = col.Find(n => n.AssignedTo == assignedTo && n.Message.Contains(keywordToUpper, StringComparison.CurrentCultureIgnoreCase)).Sort(Builders<Notification>.Sort.Descending(n => n.AssignedOn)).ToList();
                 return notifications;
             }
         }
