@@ -1,13 +1,13 @@
 ﻿window.authorize = function (username) {
-    set("wf-swagger-authorize", '{"Username": "' + username + '"}');
+    set("wf-authorize", '{"Username": "' + username + '"}');
 }
 
 window.getUser = function () {
-    return get("wf-swagger-authorize");
+    return get("wf-authorize");
 }
 
 window.deleteUser = function () {
-    remove("wf-swagger-authorize");
+    remove("wf-authorize");
 }
 
 window.logout = function (callback) {

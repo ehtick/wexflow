@@ -64,9 +64,7 @@ Source: "..\src\net\Wexflow.Tasks.WebToScreenshot\bin\x86\Release\selenium-manag
 ; Wexflow Manager
 Source: "..\src\net\Wexflow.Clients.Manager\bin\Release\Wexflow.Clients.Manager.exe"; DestDir: "{app}\Manager"; Flags: ignoreversion
 Source: "..\src\net\Wexflow.Clients.Manager\bin\Release\Wexflow.Clients.Manager.exe.config"; DestDir: "{app}\Manager"; Flags: ignoreversion
-Source: "..\src\net\Wexflow.Clients.Manager\bin\Release\Wexflow.Core.Service.Client.dll"; DestDir: "{app}\Manager"; Flags: ignoreversion
-Source: "..\src\net\Wexflow.Clients.Manager\bin\Release\Newtonsoft.Json.dll"; DestDir: "{app}\Manager"; Flags: ignoreversion
-Source: "..\src\net\Wexflow.Clients.Manager\bin\Release\Wexflow.Core.Service.Contracts.dll"; DestDir: "{app}\Manager"; Flags: ignoreversion
+Source: "..\src\net\Wexflow.Clients.Manager\bin\x64\Release\*.dll"; DestDir: "{app}\Manager"; Flags: ignoreversion
 
 ; Wexflow.Clients.CommandLine
 Source: "..\src\net\Wexflow.Clients.CommandLine\bin\x86\Release\Wexflow.Clients.CommandLine.exe"; DestDir: "{app}\Wexflow.Clients.CommandLine"; Flags: ignoreversion
@@ -82,7 +80,7 @@ Source: "..\src\admin\Wexflow.Admin\assets\*"; DestDir: "{app}\Admin\assets"; Fl
 Source: "..\src\admin\Wexflow.Admin\css\*.css"; DestDir: "{app}\Admin\css"; Flags: ignoreversion
 Source: "..\src\admin\Wexflow.Admin\css\images\*"; DestDir: "{app}\Admin\css\images"; Flags: ignoreversion
 
-Source: "..\src\admin\Wexflow.Admin\js\*.js"; DestDir: "{app}\Admin\js"; Flags: ignoreversion
+Source: "..\src\admin\Wexflow.Admin\js\*"; DestDir: "{app}\Admin\js"; Flags: ignoreversion recursesubdirs
 
 ; Wexflow's Documentation
 Source: "..\src\net\Wexflow.Core\Workflow.xml"; DestDir: "{app}\Documentation\"; DestName: "_Workflow.xml"; Flags: ignoreversion
